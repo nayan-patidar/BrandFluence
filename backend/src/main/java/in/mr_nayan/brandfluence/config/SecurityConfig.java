@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,16 +20,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import in.mr_nayan.brandfluence.security.JwtAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
+
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -42,18 +49,15 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login"
                         ).permitAll()
 
-                        // Admin only
                         .requestMatchers(
                                 "/api/users/all"
                         ).hasRole("ADMIN")
 
-                        // Everything else requires login
                         .anyRequest().authenticated()
                 )
 
@@ -68,7 +72,8 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration configuration =
+                new CorsConfiguration();
 
         configuration.setAllowedOrigins(
                 List.of("http://localhost:5173")
